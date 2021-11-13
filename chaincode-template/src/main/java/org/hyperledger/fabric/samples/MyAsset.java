@@ -15,19 +15,19 @@ import com.owlike.genson.annotation.JsonProperty;
 public final class MyAsset {
 
     @Property()
-    private final String assetID;
+    private String assetID;
 
     @Property()
-    private final String color;
+    private String color;
 
     @Property()
-    private final int size;
+    private int size;
 
     @Property()
-    private final String owner;
+    private String owner;
 
     @Property()
-    private final int appraisedValue;
+    private int appraisedValue;
 
     public String getAssetID() {
         return assetID;
@@ -49,7 +49,7 @@ public final class MyAsset {
         return appraisedValue;
     }
 
-    public Asset(@JsonProperty("assetID") final String assetID, @JsonProperty("color") final String color,
+    public MyAsset(@JsonProperty("assetID") final String assetID, @JsonProperty("color") final String color,
             @JsonProperty("size") final int size, @JsonProperty("owner") final String owner,
             @JsonProperty("appraisedValue") final int appraisedValue) {
         this.assetID = assetID;
@@ -69,7 +69,7 @@ public final class MyAsset {
             return false;
         }
 
-        Asset other = (Asset) obj;
+        MyAsset other = (MyAsset) obj;
 
         return Objects.deepEquals(
                 new String[] {getAssetID(), getColor(), getOwner()},
