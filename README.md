@@ -1,4 +1,4 @@
 # A simple template for Hyperledger Fabric Smart Contract and Application
 1. clone this repo
-2. import chaincode-template as a gradle project
+2. import the two project in an IDE as gradle ones
 3. fun
