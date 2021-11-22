@@ -27,6 +27,12 @@ repositories {
     }
 }
 
+copy {
+    from '.'
+    into './build/install/basic'
+    include 'META-INF/*'
+}
+
 application {
     mainClass = 'org.hyperledger.fabric.contract.ContractRouter'
 }

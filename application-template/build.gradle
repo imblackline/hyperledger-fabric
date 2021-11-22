@@ -14,7 +14,7 @@ plugins {
     id 'application'
 }
 ext {
-   javaMainClass = "application.java.App"
+   javaMainClass = "application.java.MyApp"
 }
 
 repositories {
@@ -31,7 +31,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClassName = 'application.java.App'
+    mainClassName = 'application.java.MyApp'
 }
 
 // task for running the app after building dependencies
