@@ -15,4 +15,4 @@ peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.exa
 -C mychannel -n basic -c '{"function":"myTransaction2","Args":["asset99"]}'
 
 # for evaluation transactions
-peer chaincode query -C mychannel -n private -c '{"function":"myTransactionK","Args":["asset99"]}'
+peer chaincode query -C mychannel -n basic -c '{"function":"myTransactionK","Args":["asset99"]}'
