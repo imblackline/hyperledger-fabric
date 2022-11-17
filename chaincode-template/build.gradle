@@ -27,12 +27,13 @@ repositories {
     }
 }
 
-copy {
-    from '.'
-    into './build/install/basic'
-    include 'META-INF/*'
-}
-
 application {
     mainClass = 'org.hyperledger.fabric.contract.ContractRouter'
+}
+
+installDist.doLast {
+    copy {
+        from "${rootDir}/META-INF/"
+        into "${buildDir}/install/${rootProject.name}/META-INF"
+    }
 }
