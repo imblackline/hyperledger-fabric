@@ -40,8 +40,8 @@ public class MyApp {
 	public static void main(String[] args) throws Exception {
 		// enrolls the admin and registers the user
 		try {
-			EnrollAdmin.main(null);
-			RegisterUser.main(null);
+			MyEnrollAdmin.main(null);
+			MyRegisterUser.main(null);
 		} catch (Exception e) {
 			System.err.println(e);
 		}
