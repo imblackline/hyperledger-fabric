@@ -39,5 +39,6 @@ task runApp(type: Exec) {
     dependsOn build
     group = "Execution"
     description = "Run the main class with ExecTask"
+    standardInput = System.in
     commandLine "java", "-classpath", sourceSets.main.runtimeClasspath.getAsPath(), javaMainClass
 }
