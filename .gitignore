@@ -1,0 +1,62 @@
+# Ignore Gradle build files
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Ignore IDE-specific files
+*.iml
+.idea/
+.vscode/
+*.swp
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Ignore Java build files
+*.class
+*.jar
+*.war
+*.ear
+
+# Ignore application-specific files
+application-template/src/main/java/App.class
+application-template/src/main/java/App$*.class
+
+# Ignore chaincode build files
+chaincode-template/src/main/java/org/hyperledger/fabric/samples/*.class
+
+# Ignore node_modules (if applicable)
+node_modules/
+
+# Ignore environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore generated files
+*.tar.gz
+*.zip
+*.tar
+*.gz
+
+# Ignore certificates and keys
+*.pem
+*.crt
+*.key
+*.cert
+
+# Ignore test network artifacts
+organizations/
+docker-compose*.yaml
+*.block
+*.tx
+wallet/
