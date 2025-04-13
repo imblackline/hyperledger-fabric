@@ -14,7 +14,7 @@ public final class Basil {
     private final String qrCode;
 
     @Property()
-    private final String creationTimestamp;
+    private final Long creationTimestamp; 
 
     @Property()
     private final String origin; // Greenhouse or starting point
@@ -33,7 +33,7 @@ public final class Basil {
 
     public Basil(
             @JsonProperty("qrCode") String qrCode,
-            @JsonProperty("creationTimestamp") String creationTimestamp,
+            @JsonProperty("creationTimestamp") Long creationTimestamp,
             @JsonProperty("origin") String origin,
             @JsonProperty("currentStatus") String currentStatus,
             @JsonProperty("currentGps") String currentGps,
@@ -52,7 +52,7 @@ public final class Basil {
         return qrCode;
     }
 
-    public String getCreationTimestamp() {
+    public Long getCreationTimestamp() {
         return creationTimestamp;
     }
 
@@ -93,7 +93,7 @@ public final class Basil {
     public String toString() {
         return "Basil{" +
                 "qrCode='" + qrCode + '\'' +
-                ", creationTimestamp='" + creationTimestamp + '\'' +
+                ", creationTimestamp=" + creationTimestamp +
                 ", origin='" + origin + '\'' +
                 ", currentStatus='" + currentStatus + '\'' +
                 ", currentGps='" + currentGps + '\'' +

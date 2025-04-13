@@ -10,7 +10,7 @@ import java.util.Objects;
 public final class BasilLeg {
 
     @Property()
-    private final String timestamp;
+    private final Long timestamp;
 
     @Property()
     private final String gps;
@@ -25,7 +25,7 @@ public final class BasilLeg {
     private final Owner owner;
 
     public BasilLeg(
-            @JsonProperty("timestamp") String timestamp,
+            @JsonProperty("timestamp") Long timestamp,
             @JsonProperty("gps") String gps,
             @JsonProperty("temperature") String temperature,
             @JsonProperty("humidity") String humidity,
@@ -37,7 +37,7 @@ public final class BasilLeg {
         this.owner = owner;
     }
 
-    public String getTimestamp() {
+    public Long getTimestamp() { 
         return timestamp;
     }
 
@@ -74,7 +74,7 @@ public final class BasilLeg {
     @Override
     public String toString() {
         return "BasilLeg{" +
-                "timestamp='" + timestamp + '\'' +
+                "timestamp=" + timestamp + 
                 ", gps='" + gps + '\'' +
                 ", temperature='" + temperature + '\'' +
                 ", humidity='" + humidity + '\'' +
