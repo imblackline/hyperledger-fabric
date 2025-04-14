@@ -28,8 +28,10 @@ import io.grpc.TlsChannelCredentials;
 
 public final class App {
 
-	// path to your test-network directory included, e.g.: Paths.get("..", "..", "test-network")
-	private static final Path PATH_TO_TEST_NETWORK = Paths.get("..", "..", "test-network");
+	// path to your test-network directory included, e.g.: Paths.get("..", "..",
+	// "test-network")
+	private static final Path PATH_TO_TEST_NETWORK = Paths
+			.get("/home/imblackline/go/src/github.com/imblackline/fabric-samples/test-network");
 
 	private static final String CHANNEL_NAME = System.getenv().getOrDefault("CHANNEL_NAME", "mychannel");
 	private static final String CHAINCODE_NAME = System.getenv().getOrDefault("CHAINCODE_NAME", "basic");
@@ -41,89 +43,89 @@ public final class App {
 	private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	public static void main(final String[] args) throws Exception {
+		try {
+			ChannelCredentials credentials = TlsChannelCredentials.newBuilder()
+					.trustManager(PATH_TO_TEST_NETWORK.resolve(Paths.get(
+							"organizations/peerOrganizations/org1.example.com/" +
+									"peers/peer0.org1.example.com/tls/ca.crt"))
+							.toFile())
+					.build();
+			// The gRPC client connection should be shared by all Gateway connections to
+			// this endpoint.
+			ManagedChannel channel = Grpc.newChannelBuilder(PEER_ENDPOINT, credentials)
+					.overrideAuthority(OVERRIDE_AUTH)
+					.build();
 
-		ChannelCredentials credentials = TlsChannelCredentials.newBuilder()
-				.trustManager(PATH_TO_TEST_NETWORK.resolve(Paths.get(
-						"organizations/peerOrganizations/org1.example.com/" +
-								"peers/peer0.org1.example.com/tls/ca.crt"))
-						.toFile())
-				.build();
-		// The gRPC client connection should be shared by all Gateway connections to
-		// this endpoint.
-		ManagedChannel channel = Grpc.newChannelBuilder(PEER_ENDPOINT, credentials)
-				.overrideAuthority(OVERRIDE_AUTH)
-				.build();
-		
-		Gateway.Builder builderOrg1 = Gateway.newInstance()
-				.identity(new X509Identity("Org1MSP",
-						Identities.readX509Certificate(
-							Files.newBufferedReader(
-								PATH_TO_TEST_NETWORK.resolve(Paths.get(
-									"organizations/peerOrganizations/org1.example.com/" +
-									"users/User1@org1.example.com/msp/signcerts/cert.pem"
-								))
-							)
-						)
-					))
-				.signer(
-					Signers.newPrivateKeySigner(
-						Identities.readPrivateKey(
-							Files.newBufferedReader(
-								Files.list(PATH_TO_TEST_NETWORK.resolve(
-									Paths.get(
-										"organizations/peerOrganizations/org1.example.com/" +
-										"users/User1@org1.example.com/msp/keystore")
-									)
-								).findFirst().orElseThrow()
-							)
-						)
-					)
-				)
-				.connection(channel)
-				// Default timeouts for different gRPC calls
-				.evaluateOptions(options -> options.withDeadlineAfter(5, TimeUnit.SECONDS))
-				.endorseOptions(options -> options.withDeadlineAfter(15, TimeUnit.SECONDS))
-				.submitOptions(options -> options.withDeadlineAfter(5, TimeUnit.SECONDS))
-				.commitStatusOptions(options -> options.withDeadlineAfter(1, TimeUnit.MINUTES));
+			Gateway.Builder builderOrg1 = Gateway.newInstance()
+					.identity(new X509Identity("Org1MSP",
+							Identities.readX509Certificate(
+									Files.newBufferedReader(
+											PATH_TO_TEST_NETWORK.resolve(Paths.get(
+													"organizations/peerOrganizations/org1.example.com/" +
+															"users/User1@org1.example.com/msp/signcerts/cert.pem"))))))
+					.signer(
+							Signers.newPrivateKeySigner(
+									Identities.readPrivateKey(
+											Files.newBufferedReader(
+													Files.list(PATH_TO_TEST_NETWORK.resolve(
+															Paths.get(
+																	"organizations/peerOrganizations/org1.example.com/"
+																			+
+																			"users/User1@org1.example.com/msp/keystore")))
+															.findFirst().orElseThrow()))))
+					.connection(channel)
+					// Default timeouts for different gRPC calls
+					.evaluateOptions(options -> options.withDeadlineAfter(5, TimeUnit.SECONDS))
+					.endorseOptions(options -> options.withDeadlineAfter(15, TimeUnit.SECONDS))
+					.submitOptions(options -> options.withDeadlineAfter(5, TimeUnit.SECONDS))
+					.commitStatusOptions(options -> options.withDeadlineAfter(1, TimeUnit.MINUTES));
 
-		// notice that we can share the grpc connection since we don't use private date,
-		// otherwise we should create another connection
-		Gateway.Builder builderOrg2 = Gateway.newInstance()
-				.identity(new X509Identity("Org2MSP",
-						Identities.readX509Certificate(Files.newBufferedReader(PATH_TO_TEST_NETWORK.resolve(Paths.get(
-								"organizations/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/signcerts/cert.pem"))))))
-				.signer(Signers.newPrivateKeySigner(Identities.readPrivateKey(Files.newBufferedReader(Files
-						.list(PATH_TO_TEST_NETWORK.resolve(Paths
-								.get("organizations/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/keystore")))
-						.findFirst().orElseThrow()))))
-				.connection(channel)
-				.evaluateOptions(options -> options.withDeadlineAfter(5, TimeUnit.SECONDS))
-				.endorseOptions(options -> options.withDeadlineAfter(15, TimeUnit.SECONDS))
-				.submitOptions(options -> options.withDeadlineAfter(5, TimeUnit.SECONDS))
-				.commitStatusOptions(options -> options.withDeadlineAfter(1, TimeUnit.MINUTES));
-		
-		try (Gateway gatewayOrg1 = builderOrg1.connect();
-				Gateway gatewayOrg2 = builderOrg2.connect()) {
-			
-			Contract contractOrg1 = gatewayOrg1
-				.getNetwork(CHANNEL_NAME)
-				.getContract(CHAINCODE_NAME);
-			
-			Contract contractOrg2 = gatewayOrg2
-				.getNetwork(CHANNEL_NAME)
-				.getContract(CHAINCODE_NAME);
-			
-			byte[] result;
-			result = contractOrg1.submitTransaction("CreateAsset",
-				"assetId1", "yellow", "5", "Tom", "1300");
-			System.out.println("Create result= " + new String(result));
+			// notice that we can share the grpc connection since we don't use private date,
+			// otherwise we should create another connection
+			Gateway.Builder builderOrg2 = Gateway.newInstance()
+					.identity(new X509Identity("Org2MSP",
+							Identities
+									.readX509Certificate(Files.newBufferedReader(PATH_TO_TEST_NETWORK.resolve(Paths.get(
+											"organizations/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/signcerts/cert.pem"))))))
+					.signer(Signers.newPrivateKeySigner(Identities.readPrivateKey(Files.newBufferedReader(Files
+							.list(PATH_TO_TEST_NETWORK.resolve(Paths
+									.get("organizations/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp/keystore")))
+							.findFirst().orElseThrow()))))
+					.connection(channel)
+					.evaluateOptions(options -> options.withDeadlineAfter(5, TimeUnit.SECONDS))
+					.endorseOptions(options -> options.withDeadlineAfter(15, TimeUnit.SECONDS))
+					.submitOptions(options -> options.withDeadlineAfter(5, TimeUnit.SECONDS))
+					.commitStatusOptions(options -> options.withDeadlineAfter(1, TimeUnit.MINUTES));
 
-			result = contractOrg1.evaluateTransaction("ReadAsset", 
-				"assetId1");
-			System.out.println("Query result= " + new String(result));
-			
-		} finally {
-			channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+			try (Gateway gatewayOrg1 = builderOrg1.connect();
+					Gateway gatewayOrg2 = builderOrg2.connect()) {
+
+				Contract contractOrg1 = gatewayOrg1
+						.getNetwork(CHANNEL_NAME)
+						.getContract(CHAINCODE_NAME);
+
+				Contract contractOrg2 = gatewayOrg2
+						.getNetwork(CHANNEL_NAME)
+						.getContract(CHAINCODE_NAME);
+
+				byte[] result;
+				// result = contractOrg1.submitTransaction("CreateAsset",
+				// "assetId1", "yellow", "5", "Tom", "1300");
+				result = contractOrg1.submitTransaction("createBasil", "basil001", "Italy");
+				System.out.println("Create result= " + new String(result));
+
+				// result = contractOrg1.evaluateTransaction("ReadAsset",
+				// "assetId1");
+				result = contractOrg1.evaluateTransaction("readBasil", "basil001");
+
+				System.out.println("Query result= " + new String(result));
+
+			} finally {
+				channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+			}
+		} catch (Exception e) {
+			System.err.println("❌ ERROR: " + e.getMessage());
+			e.printStackTrace(); // <--- this is what will give us the actual issue
 		}
 	}
 
