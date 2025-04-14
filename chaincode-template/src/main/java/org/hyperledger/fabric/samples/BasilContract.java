@@ -11,7 +11,19 @@ import com.owlike.genson.Genson;
 import java.util.ArrayList;
 import java.util.List;
 
-@Contract(name = "BasilContract")
+@Contract(
+        name = "BasilContract",
+        info = @Info(
+                title = "My Smart contract",
+                description = "The hyperlegendary asset transfer",
+                version = "1.0",
+                license = @License(
+                        name = "Apache 2.0 License",
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.html"),
+                contact = @Contact(
+                        email = "a.transfer@example.com",
+                        name = "Adrian Transfer",
+                        url = "https://hyperledger.example.com")))
 @Default
 public class BasilContract implements ContractInterface {
 
