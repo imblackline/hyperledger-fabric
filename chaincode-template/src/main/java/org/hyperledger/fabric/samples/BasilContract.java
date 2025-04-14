@@ -28,21 +28,27 @@ import java.util.List;
 public class BasilContract implements ContractInterface {
 
     private final Genson genson = new Genson();
+    private static final String SUPERMARKET_ORG = "Org2MSP";
 
     // Create a new basil plant
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public void createBasil(Context ctx, String qrCode, String origin) {
+        rejectIfSupermarket(ctx);
         ChaincodeStub stub = ctx.getStub();
 
         if (stub.getStringState(qrCode) != null && !stub.getStringState(qrCode).isEmpty()) {
             throw new ChaincodeException("Basil already exists with QR: " + qrCode);
         }
- 
+
         String orgId = ctx.getClientIdentity().getMSPID();
         Owner owner = new Owner(orgId, "Greenhouse");
         Long creationTimestamp = stub.getTxTimestamp().getEpochSecond();
 
-        Basil basil = new Basil(qrCode, creationTimestamp, origin, "Created", null, owner, new ArrayList<>());
+        BasilLeg initialLeg = createBasilLeg(creationTimestamp, origin, "N/A", "N/A", owner);
+        List<BasilLeg> history = new ArrayList<>();
+        history.add(initialLeg);
+
+        Basil basil = new Basil(qrCode, creationTimestamp, origin, "Created", origin, owner, history);
 
         stub.putStringState(qrCode, genson.serialize(basil));
     }
@@ -50,6 +56,7 @@ public class BasilContract implements ContractInterface {
     // Stop tracking a basil plant (delete it)
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public void deleteBasil(Context ctx, String qrCode) {
+        rejectIfSupermarket(ctx);
         ChaincodeStub stub = ctx.getStub();
         Basil basil = readBasil(ctx, qrCode);
 
@@ -65,6 +72,7 @@ public class BasilContract implements ContractInterface {
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public void updateBasilState(Context ctx, String qrCode, String gps, Long timestamp, String temp, String humidity,
             String status) {
+        rejectIfSupermarket(ctx);
         ChaincodeStub stub = ctx.getStub();
         Basil basil = readBasil(ctx, qrCode);
 
@@ -74,7 +82,7 @@ public class BasilContract implements ContractInterface {
         }
 
         Owner owner = basil.getCurrentOwner();
-        BasilLeg leg = new BasilLeg(timestamp, gps, temp, humidity, owner);
+        BasilLeg leg = createBasilLeg(timestamp, gps, temp, humidity, owner);
         basil.getTransportHistory().add(leg);
 
         Basil updated = new Basil(
@@ -109,6 +117,7 @@ public class BasilContract implements ContractInterface {
     // Transfer ownership to another organization
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public void transferOwnership(Context ctx, String qrCode, String newOrgId, String newName) {
+        rejectIfSupermarket(ctx);
         ChaincodeStub stub = ctx.getStub();
         Basil basil = readBasil(ctx, qrCode);
 
@@ -131,7 +140,16 @@ public class BasilContract implements ContractInterface {
     }
 
     private String getClientOrgId(Context ctx) {
-        // In a real app, use the client's certificate to derive the org
         return ctx.getClientIdentity().getMSPID();
+    }
+
+    private void rejectIfSupermarket(Context ctx) {
+        if (SUPERMARKET_ORG.equals(ctx.getClientIdentity().getMSPID())) {
+            throw new ChaincodeException("Operation not permitted for the supermarket organization.");
+        }
+    }
+
+    private BasilLeg createBasilLeg(Long timestamp, String gps, String temperature, String humidity, Owner owner) {
+        return new BasilLeg(timestamp, gps, temperature, humidity, owner);
     }
 }
