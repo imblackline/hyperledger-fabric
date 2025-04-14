@@ -13,16 +13,12 @@ public final class Owner {
 
     @Property()
     private String user;
-
-    @Property()
-    private String role; // e.g., Greenhouse, Transporter, Supermarket
+// e.g., Greenhouse, Transporter, Supermarket
 
     public Owner(@JsonProperty("orgId") final String orgId,
-            @JsonProperty("user") final String user,
-            @JsonProperty("role") final String role) {
+            @JsonProperty("user") final String user) {
         this.orgId = orgId;
         this.user = user;
-        this.role = role;
     }
 
     public String getOrgId() {
@@ -33,9 +29,6 @@ public final class Owner {
         return user;
     }
 
-    public String getRole() {
-        return role;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -45,8 +38,7 @@ public final class Owner {
             return false;
         Owner owner = (Owner) o;
         return Objects.equals(orgId, owner.orgId)
-                && Objects.equals(user, owner.user)
-                && Objects.equals(role, owner.role);
+                && Objects.equals(user, owner.user);
     }
 
     @Override
@@ -56,6 +48,6 @@ public final class Owner {
 
     @Override
     public String toString() {
-        return "Owner{" + "orgId='" + orgId + '\'' + ", user='" + user + '\'' + ", role='" + role + '\'' + '}';
+        return "Owner{" + "orgId='" + orgId + '\'' + ", user='" + user + '\'' + '}';
     }
 }
