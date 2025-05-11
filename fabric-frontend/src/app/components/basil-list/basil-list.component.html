@@ -1,0 +1,36 @@
+<div class="container">
+  <h1>Basil Management</h1>
+
+  <!-- Create Basil Form -->
+  <div class="create-form">
+    <h2>Create New Basil</h2>
+    <form (ngSubmit)="createBasil()">
+      <div class="form-group">
+        <label for="id">ID:</label>
+        <input type="text" id="id" [(ngModel)]="newBasil.id" name="id" required>
+      </div>
+      <div class="form-group">
+        <label for="country">Country:</label>
+        <input type="text" id="country" [(ngModel)]="newBasil.country" name="country" required>
+      </div>
+      <button type="submit">Create Basil</button>
+    </form>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Basil List -->
+  <div class="basil-list">
+    <h2>Basil List</h2>
+    <div *ngIf="basils.length === 0" class="no-basils">
+      No basils found
+    </div>
+    <div *ngFor="let basil of basils" class="basil-card">
+      <h3>ID: {{ basil.id }}</h3>
+      <p>Country: {{ basil.country }}</p>
+    </div>
+  </div>
+</div>
