@@ -5,6 +5,8 @@ import org.hyperledger.fabric.client.Gateway;
 import org.hyperledger.fabric.client.GatewayException;
 import org.hyperledger.fabric.client.CommitException;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -82,8 +84,42 @@ public class FabricService {
     }
 
     public String readBasil(String id) throws GatewayException {
-        byte[] result = contract.evaluateTransaction("readBasil", id);
+        try {
+            byte[] result = contract.evaluateTransaction("readBasil", id);
+            if (result == null || result.length == 0) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No basil found with ID: " + id);
+            }
+            return new String(result, StandardCharsets.UTF_8);
+        } catch (GatewayException e) {
+            if (e.getMessage().contains("No basil found")) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No basil found with ID: " + id);
+            }
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error getting basil: " + e.getMessage());
+        }
+    }
+
+    
+
+    public String deleteBasil(String id) throws GatewayException, CommitException {
+        contract.submitTransaction("deleteBasil", id);
+        return "Basil deleted successfully";
+    }
+
+    public String updateBasilState(String id, String gps, Long timestamp, String temp, String humidity, String status) 
+            throws GatewayException, CommitException {
+        contract.submitTransaction("updateBasilState", id, gps, timestamp.toString(), temp, humidity, status);
+        return "Basil state updated successfully";
+    }
+
+    public String getBasilHistory(String id) throws GatewayException {
+        byte[] result = contract.evaluateTransaction("getHistory", id);
         return new String(result, StandardCharsets.UTF_8);
+    }
+
+    public String transferBasilOwnership(String id, String newOrgId, String newName) 
+            throws GatewayException, CommitException {
+        contract.submitTransaction("transferOwnership", id, newOrgId, newName);
+        return "Basil ownership transferred successfully";
     }
 
     public void cleanup() {

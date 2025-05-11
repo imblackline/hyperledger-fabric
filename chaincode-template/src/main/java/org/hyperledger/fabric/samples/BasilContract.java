@@ -5,11 +5,16 @@ import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.*;
 import org.hyperledger.fabric.shim.ChaincodeException;
 import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.hyperledger.fabric.shim.ledger.KeyValue;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
+import org.hyperledger.fabric.shim.ledger.KeyModification;
 
 import com.owlike.genson.Genson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Contract(
         name = "BasilContract",
@@ -52,6 +57,7 @@ public class BasilContract implements ContractInterface {
 
         stub.putStringState(qrCode, genson.serialize(basil));
     }
+
 
     // Stop tracking a basil plant (delete it)
     @Transaction(intent = Transaction.TYPE.SUBMIT)
@@ -107,6 +113,7 @@ public class BasilContract implements ContractInterface {
         return genson.deserialize(data, Basil.class);
     }
 
+
     // Get the transport history
     @Transaction(intent = Transaction.TYPE.EVALUATE)
     public List<BasilLeg> getHistory(Context ctx, String qrCode) {
@@ -137,6 +144,43 @@ public class BasilContract implements ContractInterface {
                 basil.getTransportHistory());
 
         stub.putStringState(qrCode, genson.serialize(updated));
+    }
+
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public String getBasilHistory(final Context ctx, final String id) {
+        ChaincodeStub stub = ctx.getStub();
+        String key = id;  // Use the ID directly as the key
+
+        // Check if basil exists
+        String data = stub.getStringState(key);
+        if (data == null || data.isEmpty()) {
+            throw new ChaincodeException("Basil with ID " + id + " does not exist");
+        }
+
+        try {
+            // Get history iterator
+            QueryResultsIterator<KeyModification> historyIterator = stub.getHistoryForKey(key);
+            
+            // Convert history to JSON array
+            List<Map<String, Object>> history = new ArrayList<>();
+            for (KeyModification modification : historyIterator) {
+                try {
+                    // Parse the value using Genson
+                    Map<String, Object> record = genson.deserialize(modification.getStringValue(), Map.class);
+                    // Add transaction timestamp
+                    record.put("timestamp", modification.getTimestamp().getEpochSecond());
+                    history.add(record);
+                } catch (Exception e) {
+                    // Skip invalid records
+                    continue;
+                }
+            }
+
+            // Return history as JSON array using Genson
+            return genson.serialize(history);
+        } catch (Exception e) {
+            throw new ChaincodeException("Error getting basil history: " + e.getMessage());
+        }
     }
 
     private String getClientOrgId(Context ctx) {
